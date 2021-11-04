@@ -9,6 +9,7 @@ using Avalonia;
 using Avalonia.Input.Platform;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using TheArtOfDev.HtmlRenderer.Adapters;
 using TheArtOfDev.HtmlRenderer.Adapters.Entities;
 using TheArtOfDev.HtmlRenderer.Avalonia.Utilities;
@@ -18,6 +19,8 @@ namespace TheArtOfDev.HtmlRenderer.Avalonia.Adapters
     class AvaloniaAdapter : RAdapter
     {
         public static AvaloniaAdapter Instance { get; } = new AvaloniaAdapter();
+
+        private static IFontManagerImpl fontManager;
 
         /// <summary>
         /// List of valid predefined color names in lower-case
@@ -87,6 +90,15 @@ namespace TheArtOfDev.HtmlRenderer.Avalonia.Adapters
                 }
             });
 
+        }
+
+        public override bool IsFontExists(string font)
+        {
+            if (fontManager == null)
+            {
+                fontManager = AvaloniaLocator.Current.GetService<IFontManagerImpl>();
+            }
+            return base.IsFontExists(font) || fontManager.GetInstalledFontFamilyNames().Any(p => p.Equals(font, StringComparison.OrdinalIgnoreCase));
         }
 
         protected override RImage ConvertImageInt(object image)
